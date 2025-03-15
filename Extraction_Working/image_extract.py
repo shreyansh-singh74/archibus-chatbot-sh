@@ -203,8 +203,8 @@ def extract_images_from_pdf_structure(input_folder, output_folder, min_image_siz
 
 if __name__ == "__main__":
     # Use Windows extended-length path syntax
-    input_folder = r"C:\Users\sriya\Programming\Projects\WorkingBus\archibus-chatbot\Extraction_Working\ArchibusDocs"
-    output_folder = r"C:\Users\sriya\Programming\Projects\WorkingBus\archibus-chatbot\Extraction_Working\Extracted"
+    input_folder = r"C:\Users\Aryan\Documents\Archibus Docs"
+    output_folder = r"C:\Users\Aryan\Documents\Archibus Docs\Extracted"
     
     try:
         extract_images_from_pdf_structure(input_folder, output_folder, min_image_size_kb=1, max_path_length=180)
