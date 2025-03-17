@@ -2,9 +2,12 @@ import os
 import json
 import streamlit as st
 import google.generativeai as genai
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
 
 # Path to the image mapping JSON
-mapping_file = "C:\\Users\\Aryan\\Documents\\Archibus Docs\\Extracted\\s3_image_mapping.json"
+mapping_file = r"C:\Users\vivek gupta\OneDrive\Desktop\archibus\archibus-chatbot\s3_image_mapping.json"
 
 # Load pre-stored S3 image mapping
 if os.path.exists(mapping_file):
@@ -27,31 +30,40 @@ generation_config = {
     "response_mime_type": "text/plain",
 }
 
+# Load and preprocess Data.txt for RAG
+data_file = "Data.txt"
+if os.path.exists(data_file):
+    with open(data_file, "r", encoding='utf-8') as file:
+        text = file.read()
+    chunks = [s.strip() for s in text.split('\n\n') if len(s.strip()) > 50]
+    model_embed = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings = model_embed.encode(chunks, convert_to_numpy=True)
+    index = faiss.IndexFlatL2(embeddings.shape[1])
+    index.add(embeddings)
+else:
+    st.warning("Data.txt not found. Running without custom data for now.")
+    chunks = ["No data available yet."]
+    model_embed = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings = model_embed.encode(chunks, convert_to_numpy=True)
+    index = faiss.IndexFlatL2(embeddings.shape[1])
+    index.add(embeddings)
+
 # Base system instruction
 base_instruction = """
-You are a professional AI assistant for Archibus.
-Your name is Archibus AI.
-Please answer user questions according to the following rules:
-
-1. Questions related to Archibus: Explain specific functions and operation methods
-2. Facility management, maintenance, and cost data: Provide accurate analysis and guidance
-3. Workflow automation: Change appropriate data based on command input
-4. Integration functions (Slack, Teams, Email): Explain how to link
-5. Learning ability: Utilize past question history to provide more appropriate answers
-
-Always answer concisely and accurately, and speak in Japanese.
+You are a professional AI assistant for Archibus named Archibus AI.
+Answer concisely and only with information relevant to the user’s question.
+Do not repeat or dump entire sections of data—summarize or extract key points.
+1. For Archibus questions: Explain functions and operations.
+2. For facility management, maintenance, or cost data: Provide analysis and guidance.
+3. For workflow automation: Adjust data based on input.
+4. For integrations (Slack, Teams, Email): Explain linking steps.
+5. Use past question history to improve answers.
+6. Respond in Japanese, keeping it professional and clear.
 """
-
-# Load custom instruction from file
-with open("Data.txt", "r") as file:
-    custom_instruction = file.read().strip()
-
-# Combine static system instruction with custom instruction
-full_instruction = f"{base_instruction}\n\n{custom_instruction}"
 
 # Store in session state
 if "custom_instruction" not in st.session_state:
-    st.session_state.custom_instruction = full_instruction
+    st.session_state.custom_instruction = base_instruction
 
 # Create the model instance
 model = genai.GenerativeModel(
@@ -60,20 +72,25 @@ model = genai.GenerativeModel(
     system_instruction=st.session_state.custom_instruction,
 )
 
-# Initialize chat history in session state
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Function to find relevant image from mapping
+# Find relevant image from mapping (still kept for pre-existing S3 mapping)
 def find_relevant_image(prompt):
-    """Search for the most relevant image in the stored mapping based on prompt keywords."""
     keywords = prompt.lower().split()
     for local_path, s3_url in image_mapping.items():
         if any(keyword in local_path.lower() for keyword in keywords):
             return s3_url
-    return None  # No relevant image found
+    return None
 
-# Function to display chat history
+# Get relevant chunks from Data.txt
+def get_relevant_chunks(prompt):
+    query_embedding = model_embed.encode([prompt])
+    distances, indices = index.search(query_embedding, k=5)
+    return "\n".join([chunks[i] for i in indices[0]])
+
+# Display chat history
 def display_chat_history():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -81,31 +98,26 @@ def display_chat_history():
             if "image_url" in message:
                 st.image(message["image_url"], caption="Relevant Image")
 
-# Function to handle user input and get response
+# Handle user input (no image upload)
 def handle_user_input(prompt: str):
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate AI response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             conversation_history = [{"role": msg["role"], "parts": [msg["content"]]} for msg in st.session_state.messages]
+            relevant_context = get_relevant_chunks(prompt)
+            full_prompt = f"Context: {relevant_context}\n\nQuestion: {prompt}"
 
             try:
-                # Start chat with AI
                 chat_session = model.start_chat(history=conversation_history)
-                response = chat_session.send_message(prompt)
+                response = chat_session.send_message(full_prompt)
 
-                # Check for relevant image
                 image_url = find_relevant_image(prompt)
-
-                # Store and display assistant response
                 response_message = {"role": "assistant", "content": response.text}
                 if image_url:
-                    response_message["image_url"] = image_url  # Add image URL if found
-
+                    response_message["image_url"] = image_url
                 st.session_state.messages.append(response_message)
                 st.markdown(response.text)
                 if image_url:
@@ -115,16 +127,14 @@ def handle_user_input(prompt: str):
                 st.error(f"An error occurred: {e}")
                 st.session_state.messages.append({"role": "assistant", "content": "Sorry, an error occurred."})
 
-# Main Streamlit App
+# Main app
 def main():
     st.set_page_config(page_title="Archibus AI", layout="wide")
     st.title("Archibus AI")
     st.markdown("Welcome to Archibus AI")
 
-    # Display chat history
     display_chat_history()
 
-    # Handle user input
     if prompt := st.chat_input("Ask me anything..."):
         handle_user_input(prompt)
 
