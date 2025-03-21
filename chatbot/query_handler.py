@@ -9,18 +9,21 @@ collection = chroma_client.get_or_create_collection(name="image_mapping_metadata
 # Load embedding model
 embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def find_relevant_image(prompt):
-    """Finds the most relevant image based on user query."""
+def find_relevant_images(prompt, top_k=5):
+    """Finds the most relevant images based on user query."""
     query_embedding = embed_model.encode(prompt).tolist()
     
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=5,
+        n_results=top_k,  # Retrieve multiple images
         include=["metadatas"]
     )
 
-    if results and "metadatas" in results and results["metadatas"][0]:
-        metadata = results["metadatas"][0][0]
-        return metadata.get("s3_url", None)
-
-    return None
+    images = []
+    if results and "metadatas" in results:
+        for metadata_list in results["metadatas"]:
+            for metadata in metadata_list:
+                if "s3_url" in metadata:
+                    images.append(metadata["s3_url"])
+    
+    return images if images else None  # Return list of images
