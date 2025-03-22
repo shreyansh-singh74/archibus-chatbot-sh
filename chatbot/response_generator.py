@@ -31,9 +31,13 @@ Please answer user questions according to the following rules:
 4. Integration functions (Slack, Teams, Email): Explain how to link **step by step**.
 5. Learning ability: Utilize past question history to provide more appropriate answers.
 
-Always answer **thoroughly yet structured**, and speak in Japanese.
-"""
+Always answer **thoroughly yet structured**, and follow the selected language:
 
+- If the selected language is **Japanese**, respond in **Japanese**.
+- If the selected language is **English**, respond in **English**.
+
+If the user does not specify a language, default to **Japanese**.
+"""
 
 # Load additional instructions from Data.txt
 data_file_path = "D:\\ArchiBusV2\\Data.txt"
@@ -47,12 +51,11 @@ else:
 # Combine static system instruction with custom instruction
 FULL_INSTRUCTION = f"{BASE_INSTRUCTION}\n\n{additional_instructions}"
 
-def generate_response(prompt):
-    """Generates AI response based on prompt with base + custom instruction."""
-    full_prompt = f"{FULL_INSTRUCTION}\n\nUser Question (Provide a detailed response): {prompt}"
+def generate_response(prompt, language="Japanese"):
+    """Generates AI response based on user input and language selection."""
+    full_prompt = f"{BASE_INSTRUCTION}\n\nUser Query: {prompt}\n\nLanguage: {language}"
 
-    
     chat_session = model.start_chat(history=[{"role": "user", "parts": [full_prompt]}])
     response = chat_session.send_message(full_prompt)
-    
+
     return response.text
