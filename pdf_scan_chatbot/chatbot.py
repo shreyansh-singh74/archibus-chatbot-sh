@@ -1,11 +1,12 @@
 import streamlit as st
-import chromadb
+from utils.faiss_store import FAISSDocumentStore
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 import fitz 
 from PIL import Image
 from io import BytesIO
+import os
 
 # Configure Gemini API
 GEMINI_API_KEY = "AIzaSyAuQOFtD6OQe_iDyPcKftGEJ5LbToJyZK8"
@@ -13,13 +14,22 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-if "chroma_client" not in st.session_state:
-    st.session_state.chroma_client = chromadb.Client()
-# Ensure the collection is created properly before using it
-try:
-    st.session_state.collection = st.session_state.chroma_client.get_or_create_collection("RagTuto")
-except Exception as e:
-    st.error(f"⚠️ Error initializing ChromaDB: {e}")
+# Define paths for FAISS
+index_path = os.path.join(os.path.dirname(__file__), "..", "data", "faiss_index.idx")
+metadata_path = os.path.join(os.path.dirname(__file__), "..", "data", "faiss_metadata.pkl")
+
+# Create data directory if it doesn't exist
+os.makedirs(os.path.dirname(index_path), exist_ok=True)
+
+if "faiss_store" not in st.session_state:
+    st.session_state.faiss_store = FAISSDocumentStore(
+        index_path=index_path if os.path.exists(index_path) else None,
+        metadata_path=metadata_path if os.path.exists(metadata_path) else None
+    )
+    
+# For API compatibility with previous ChromaDB code
+if "collection" not in st.session_state:
+    st.session_state.collection = st.session_state.faiss_store
 
 if "processed_files" not in st.session_state:
     st.session_state.processed_files = set()
@@ -56,17 +66,32 @@ def upload_and_embed_pdf(pdf_file):
         images = extract_images_from_pdf(pdf_file)
         st.session_state.extracted_images[pdf_file.name] = images
 
+        documents = []
+        embeddings = []
+        ids = []
+
         for page_num, page in enumerate(pdf_reader.pages, start=1):
             text = page.extract_text()
             if text:
                 embedding = embedding_model.encode(text).tolist()  
-                embedding_id = f"{pdf_file.name}_{page_num}"  
-                st.session_state.collection.add(
-                    documents=[text],
-                    embeddings=[embedding],
-                    ids=[embedding_id],
-                )
+                embedding_id = f"{pdf_file.name}_{page_num}"
+                
+                documents.append(text)
+                embeddings.append(embedding)
+                ids.append(embedding_id)
+                
                 st.write(f"Added embedding for page {page_num} with ID {embedding_id}")  
+        
+        # Add all embeddings at once for better performance
+        if documents:
+            st.session_state.collection.add(
+                documents=documents,
+                embeddings=embeddings,
+                ids=ids,
+            )
+            
+            # Save the updated index and metadata
+            st.session_state.faiss_store.save(index_path, metadata_path)
         
         status.update(label="✅ Document analyzed successfully!", state="complete", expanded=False)
 
@@ -77,6 +102,10 @@ def remove_document():
     if st.session_state.uploaded_file:
         doc_ids = [f"{st.session_state.uploaded_file}_{i}" for i in range(1000)]  
         st.session_state.collection.delete(ids=doc_ids)
+        
+        # Save the updated index and metadata
+        st.session_state.faiss_store.save(index_path, metadata_path)
+        
         st.session_state.processed_files.discard(st.session_state.uploaded_file)
         st.session_state.uploaded_file = None
         st.session_state.extracted_images.pop(st.session_state.uploaded_file, None)
@@ -104,7 +133,7 @@ def chat_with_gemini(query):
         n_results=3
     )
 
-    if not closest_pages["documents"]:
+    if not closest_pages["documents"] or len(closest_pages["documents"][0]) == 0:
         return "No relevant context found. Try rephrasing your question!", None
 
     context = "\n".join(closest_pages["documents"][0])
@@ -120,13 +149,13 @@ def chat_with_gemini(query):
     images_for_page = get_images_for_page(page_number)
 
     with st.spinner("🤖 Generating response..."):
-        model = genai.GenerativeModel("gemini-2.0-flash")  # Use Gemini-Pro model
+        model = genai.GenerativeModel("gemini-2.0-flash")  # Use Gemini model
         response = model.generate_content(f"Context:\n{context}\n\nQuestion: {query}")
 
     return response.text, images_for_page
 
-st.set_page_config(page_title="Chatbot with Document Upload (RAM-Based)", layout="wide")
-st.title("📄💬 AI Chatbot with In-Memory Document Search")
+st.set_page_config(page_title="Chatbot with Document Upload (FAISS-Based)", layout="wide")
+st.title("📄💬 AI Chatbot with FAISS Document Search")
 
 uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"], help="Upload your document to start chatting with it.")
 if uploaded_file:

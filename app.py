@@ -1,14 +1,12 @@
 import os
-
-__import__('pysqlite3')
 import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-# Now import the rest of your modules
+# Now import the rest of your modules (no ChromaDB dependencies)
 import streamlit as st
 from chatbot.response_generator import generate_response
 from chatbot.query_handler import find_relevant_images
 
+# Rest of your app code...
 
 st.set_page_config(page_title="Archibus AI", layout="wide")
 
