@@ -1,12 +1,10 @@
-import sys
 import os
 
-# __import__('pysqlite3')
-# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-import sqlite3
-print(f"SQLite version: {sqlite3.sqlite_version}")
-
+# Now import the rest of your modules
 import streamlit as st
 from chatbot.response_generator import generate_response
 from chatbot.query_handler import find_relevant_images
