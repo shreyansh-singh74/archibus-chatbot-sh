@@ -3,7 +3,9 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 
 # Load ChromaDB
-db_path = "D:\\test\\Extractor\\s3_upload\\chromadb"
+# db_path = "C:\Users\sriya\archibus-chatbot-sh\Extractor\s3_upload\chromadb"
+db_path = r"C:\Users\sriya\archibus-chatbot-sh\Extractor\s3_upload\chromadb"
+
 chroma_client = chromadb.PersistentClient(path=db_path)
 collection = chroma_client.get_or_create_collection(name="image_mapping_metadata")
 
