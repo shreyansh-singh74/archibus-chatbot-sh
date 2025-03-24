@@ -1,6 +1,13 @@
+import sys
+import os
+
+__import__('pysqlite3')
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import streamlit as st
 from chatbot.response_generator import generate_response
 from chatbot.query_handler import find_relevant_images
+
 
 st.set_page_config(page_title="Archibus AI", layout="wide")
 
