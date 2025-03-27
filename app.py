@@ -22,38 +22,50 @@ if "language" not in st.session_state:
 st.markdown(
     """
     <style>
-        /* Hide "Manage App" button */
-        div[data-testid="manageAppButton"] {display: none !important;}
+        /* ✅ Hide "Manage App" button */
+        .stDeployButton, .viewerBadge_container__1QSob {
+            display: none !important;
+        }
 
-        /* Hide header elements but keep the hamburger menu */
-        header {visibility: hidden;}
-        
-        /* Hide MainMenu (GitHub logo) */
-        #MainMenu {visibility: hidden;}
-        
-        /* Hide footer (including manage app button) */
-        footer {visibility: hidden;}
-        
-        /* Hide toolbar elements (like view/edit source buttons) */
-        div[data-testid="stToolbar"] {display: none !important;}
-        
-        /* Hide specific buttons by their attributes */
-        button[title="View fullscreen"] {display: none !important;}
-        button[title="Download"] {display: none !important;}
-        button[title="Share"] {display: none !important;}
-        button[title="View source"] {display: none !important;}
-        button[title="Edit source"] {display: none !important;}
-        button[title="Star"] {display: none !important;}
-        
-        /* Hide deploy/manage app buttons */
-        .stDeployButton {display: none !important;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        button[kind="secondary"][data-testid="baseButton-secondary"] {display: none !important;}
-        
-        /* ✅ Ensure the three-dot (⋮) menu button is visible */
-        button[data-testid="stAppViewerMenuButton"] {display: inline-flex !important; visibility: visible !important;}
+        /* ✅ Hide footer but keep three-dot menu */
+        footer {
+            visibility: hidden;
+        }
 
-        /* Rest of your existing navbar styles */
+        /* ✅ Hide header elements except settings menu */
+        header {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ✅ Hide Streamlit logo and MainMenu */
+        #MainMenu {
+            display: none !important;
+        }
+
+        /* ✅ Hide toolbar elements (View Source, Download, etc.) */
+        div[data-testid="stToolbar"] {
+            display: none !important;
+        }
+
+        /* ✅ Ensure the three-dot (⋮) menu button remains visible */
+        button[data-testid="stAppViewerMenuButton"] {
+            display: inline-flex !important;
+            visibility: visible !important;
+        }
+
+        /* ✅ Hide specific toolbar buttons */
+        button[title="View fullscreen"],
+        button[title="Download"],
+        button[title="Share"],
+        button[title="View source"],
+        button[title="Edit source"],
+        button[title="Star"] {
+            display: none !important;
+        }
+
+        /* Rest of navbar styles */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -63,6 +75,7 @@ st.markdown(
             color: white;
             border-bottom: 1px solid #333;
         }
+
         .navbar-title {
             font-size: 20px;
             font-weight: bold;
@@ -71,6 +84,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 # ✅ Sidebar UI (New Chat, Search, Language Selector)
