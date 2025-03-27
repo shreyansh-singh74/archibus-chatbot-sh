@@ -23,42 +23,35 @@ st.markdown(
     """
     <style>
         /* ✅ Hide "Manage App" button */
-        .stDeployButton, .viewerBadge_container__1QSob {
+        .stDeployButton, 
+        .viewerBadge_container__1QSob,
+        #manage-app-button {
             display: none !important;
         }
 
-        /* ✅ Hide footer but keep three-dot menu */
+        /* ✅ Hide "Hosted with Streamlit" message & GitHub logo from footer */
         footer {
-            visibility: hidden;
-        }
-
-        /* ✅ Hide header elements except settings menu */
-        header {
-            display: flex !important;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* ✅ Hide Streamlit logo and MainMenu */
-        #MainMenu {
             display: none !important;
-        }
-        #manage-app-button{
-            display: none !important;
+            visibility: hidden !important;
         }
 
-        /* ✅ Hide toolbar elements (View Source, Download, etc.) */
-        div[data-testid="stToolbar"] {
-            display: none !important;
-        }
-
-        /* ✅ Ensure the three-dot (⋮) menu button remains visible */
+        /* ✅ Keep the three-dot (⋮) menu visible */
         button[data-testid="stAppViewerMenuButton"] {
             display: inline-flex !important;
             visibility: visible !important;
         }
 
-        /* ✅ Hide specific toolbar buttons */
+        /* ✅ Hide Streamlit Main Menu (GitHub logo) */
+        #MainMenu {
+            display: none !important;
+        }
+
+        /* ✅ Hide unnecessary toolbar elements */
+        div[data-testid="stToolbar"] {
+            display: none !important;
+        }
+
+        /* ✅ Hide unwanted toolbar buttons */
         button[title="View fullscreen"],
         button[title="Download"],
         button[title="Share"],
@@ -68,7 +61,7 @@ st.markdown(
             display: none !important;
         }
 
-        /* Rest of navbar styles */
+        /* ✅ Style adjustments for navbar */
         .navbar {
             display: flex;
             justify-content: space-between;
