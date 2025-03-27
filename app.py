@@ -18,9 +18,40 @@ if "language" not in st.session_state:
     st.session_state.language = "Japanese"
 
 # ✅ Custom Navbar
+# Replace or add to your existing st.markdown CSS section:
+
 st.markdown(
     """
     <style>
+        /* Hide header elements but keep the hamburger menu */
+        header {visibility: hidden;}
+        
+        /* Hide MainMenu (GitHub logo) */
+        #MainMenu {visibility: hidden;}
+        
+        /* Hide footer (including manage app button) */
+        footer {visibility: hidden;}
+        
+        /* Hide toolbar elements (like view/edit source buttons) */
+        div[data-testid="stToolbar"] {display: none !important;}
+        
+        /* Hide specific buttons by their attributes */
+        button[title="View fullscreen"] {display: none !important;}
+        button[title="Download"] {display: none !important;}
+        button[title="Share"] {display: none !important;}
+        button[title="View source"] {display: none !important;}
+        button[title="Edit source"] {display: none !important;}
+        button[title="Star"] {display: none !important;}
+        
+        /* Hide deploy/manage app buttons */
+        .stDeployButton {display: none !important;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        button[kind="secondary"][data-testid="baseButton-secondary"] {display: none !important;}
+        
+        /* Show triple dot menu button explicitly */
+        button[data-testid="stAppViewerMenuButton"] {display: inline-flex !important;}
+        
+        /* Rest of your existing navbar styles */
         .navbar {
             display: flex;
             justify-content: space-between;
