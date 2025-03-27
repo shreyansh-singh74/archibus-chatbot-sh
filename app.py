@@ -16,26 +16,6 @@ if "messages" not in st.session_state:
 
 if "language" not in st.session_state:
     st.session_state.language = "Japanese"
-    
-if "theme" not in st.session_state:
-    st.session_state.theme = "dark"  # Default to dark theme
-
-# Hide Streamlit default UI elements
-st.markdown(
-    """
-    <style>
-        header {visibility: hidden;}
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .stDeployButton {display: none;}
-        button[title="View source"] {display: none !important;}
-        button[title="Edit source"] {display: none !important;}
-        div[data-testid="stToolbar"] {display: none !important;}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 
 # ✅ Custom Navbar
 st.markdown(
@@ -75,9 +55,6 @@ if st.sidebar.button("🔍 Search"):
 selected_language = st.sidebar.radio("Choose Language:", ["English", "Japanese"])
 st.session_state.language = selected_language  # Update session state with selected language
 
-# ✅ Theme selection in sidebar
-selected_theme = st.sidebar.radio("Theme:", ["Light", "Dark"], index=1 if st.session_state.theme == "dark" else 0)
-st.session_state.theme = "dark" if selected_theme == "Dark" else "light"  # Update session state with selected theme
 # ✅ Display Chat History
 def display_chat_history():
     """Displays past messages and retrieved images."""
@@ -136,8 +113,8 @@ def handle_user_input(prompt):
             #         handle_user_input(prompt)
 
 # ✅ Streamlit UI
-st.title("Welcome to Archibus AI")
-# st.markdown("Welcome to Archibus AI")
+st.title("Archibus AI")
+st.markdown("Welcome to Archibus AI")
 
 display_chat_history()
 
