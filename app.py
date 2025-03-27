@@ -43,6 +43,9 @@ st.markdown(
         #MainMenu {
             display: none !important;
         }
+        #manage-app-button{
+            display: none !important;
+        }
 
         /* ✅ Hide toolbar elements (View Source, Download, etc.) */
         div[data-testid="stToolbar"] {
