@@ -19,10 +19,12 @@ if "language" not in st.session_state:
 
 # ✅ Custom Navbar
 # Replace or add to your existing st.markdown CSS section:
-
 st.markdown(
     """
     <style>
+        /* Hide "Manage App" button */
+        div[data-testid="manageAppButton"] {display: none !important;}
+
         /* Hide header elements but keep the hamburger menu */
         header {visibility: hidden;}
         
@@ -48,9 +50,9 @@ st.markdown(
         .viewerBadge_container__1QSob {display: none !important;}
         button[kind="secondary"][data-testid="baseButton-secondary"] {display: none !important;}
         
-        /* Show triple dot menu button explicitly */
-        button[data-testid="stAppViewerMenuButton"] {display: inline-flex !important;}
-        
+        /* ✅ Ensure the three-dot (⋮) menu button is visible */
+        button[data-testid="stAppViewerMenuButton"] {display: inline-flex !important; visibility: visible !important;}
+
         /* Rest of your existing navbar styles */
         .navbar {
             display: flex;
@@ -66,12 +68,10 @@ st.markdown(
             font-weight: bold;
         }
     </style>
-    <div class="navbar">
-        <span class="navbar-title">Archibus AI</span>
-    </div>
     """,
     unsafe_allow_html=True
 )
+
 
 # ✅ Sidebar UI (New Chat, Search, Language Selector)
 st.sidebar.title("Settings")
