@@ -17,6 +17,24 @@ if "messages" not in st.session_state:
 if "language" not in st.session_state:
     st.session_state.language = "Japanese"
 
+
+# Hide Streamlit default UI elements
+st.markdown(
+    """
+    <style>
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stDeployButton {display: none;}
+        button[title="View source"] {display: none !important;}
+        button[title="Edit source"] {display: none !important;}
+        div[data-testid="stToolbar"] {display: none !important;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # ✅ Custom Navbar
 st.markdown(
     """

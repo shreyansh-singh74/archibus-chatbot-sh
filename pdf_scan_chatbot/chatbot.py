@@ -127,7 +127,7 @@ def display_images_gallery(images_for_page):
         st.write("🔍 No images found for this page.")
 
 def chat_with_gemini(query):
-    query_embedding = embedding_model.encode(query).tolist()
+    query_embedding = embedding_model.encode(query).tolist() 
     closest_pages = st.session_state.collection.query(
         query_embeddings=[query_embedding],
         n_results=3
