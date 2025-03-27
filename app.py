@@ -16,7 +16,9 @@ if "messages" not in st.session_state:
 
 if "language" not in st.session_state:
     st.session_state.language = "Japanese"
-
+    
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"  # Default to dark theme
 
 # Hide Streamlit default UI elements
 st.markdown(
@@ -36,29 +38,40 @@ st.markdown(
 
 
 # ✅ Custom Navbar
+# st.markdown(
+#     """
+#     <style>
+#         .navbar {
+#             display: flex;
+#             justify-content: space-between;
+#             align-items: center;
+#             padding: 0.75rem 1.5rem;
+#             background-color: #121212;
+#             color: white;
+#             border-bottom: 1px solid #333;
+#         }
+#         .navbar-title {
+#             font-size: 20px;
+#             font-weight: bold;
+#         }
+#     </style>
+#     <div class="navbar">
+#         <span class="navbar-title">Archibus AI</span>
+#     </div>
+#     """,
+#     unsafe_allow_html=True
+# )
+
+# ✅ Custom Navbar (simplified, styling moved to dynamic CSS)
 st.markdown(
     """
-    <style>
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            background-color: #121212;
-            color: white;
-            border-bottom: 1px solid #333;
-        }
-        .navbar-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-    </style>
     <div class="navbar">
         <span class="navbar-title">Archibus AI</span>
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 # ✅ Sidebar UI (New Chat, Search, Language Selector)
 st.sidebar.title("Settings")
@@ -72,6 +85,62 @@ if st.sidebar.button("🔍 Search"):
 # ✅ Language selection in sidebar
 selected_language = st.sidebar.radio("Choose Language:", ["English", "Japanese"])
 st.session_state.language = selected_language  # Update session state with selected language
+
+# ✅ Theme selection in sidebar
+selected_theme = st.sidebar.radio("Theme:", ["Light", "Dark"], index=1 if st.session_state.theme == "dark" else 0)
+st.session_state.theme = "dark" if selected_theme == "Dark" else "light"  # Update session state with selected theme
+
+# Dynamic CSS based on theme
+dark_mode = st.session_state.theme == "dark"
+base_bg_color = "#121212" if dark_mode else "#FFFFFF"
+text_color = "#FFFFFF" if dark_mode else "#000000"
+navbar_bg = "#121212" if dark_mode else "#F0F2F6" 
+navbar_border = "#333" if dark_mode else "#DDDDDD"
+container_bg = "#1E1E1E" if dark_mode else "#F8F9FA"
+
+# Hide Streamlit default UI elements and apply theme
+st.markdown(
+    f"""
+    <style>
+        header {{visibility: hidden;}}
+        #MainMenu {{visibility: hidden;}}
+        footer {{visibility: hidden;}}
+        .stDeployButton {{display: none;}}
+        button[title="View source"] {{display: none !important;}}
+        button[title="Edit source"] {{display: none !important;}}
+        div[data-testid="stToolbar"] {{display: none !important;}}
+        
+        .stApp {{
+            background-color: {base_bg_color};
+            color: {text_color};
+        }}
+        
+        .navbar {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: {navbar_bg};
+            color: {text_color};
+            border-bottom: 1px solid {navbar_border};
+        }}
+        
+        .navbar-title {{
+            font-size: 20px;
+            font-weight: bold;
+        }}
+        
+        .response-container {{
+            background-color: {container_bg};
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # ✅ Display Chat History
 def display_chat_history():
