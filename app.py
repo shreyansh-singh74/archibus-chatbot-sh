@@ -30,9 +30,14 @@ st.markdown(
         }
 
         /* ✅ Hide "Hosted with Streamlit" message & GitHub logo from footer */
-        footer {
+        footer, .viewerBadge_link__1S137 {
             display: none !important;
             visibility: hidden !important;
+        }
+        
+        /* ✅ Hide any additional elements in the footer */
+        footer .st-emotion-cache, footer div {
+            display: none !important;
         }
 
         /* ✅ Keep the three-dot (⋮) menu visible */
